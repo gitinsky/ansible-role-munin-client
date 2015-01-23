@@ -1,0 +1,24 @@
+---
+- name: install munin-node
+  apt: name={{ item }} state=present
+  # update_cache=yes
+  with_items:
+      - munin-node
+
+- name: define server ip address if it is not set
+  set_fact:
+      # munin_server_address: "{{ munin_group_search_prefix + '-munin-server'}}"
+      munin_server_address: "{{ hostvars[groups[munin_group_search_prefix + '-munin-server'][0]]['ansible_' + munin__server_interface]['ipv4']['address']}}"
+  when: munin_server_address is not defined
+  
+- name: munin.conf
+  template:
+      src=munin-node.conf
+      dest=/etc/munin/munin-node.conf
+  register: munin_node
+  notify: reload munin
+
+- name: set munin_client_configuration_changed to yes
+  set_fact:
+      munin_client_configuration_changed: yes
+  when: munin_node.changed
