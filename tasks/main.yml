@@ -10,6 +10,11 @@
       # munin_server_address: "{{ munin_group_search_prefix + '-munin-server'}}"
       munin_server_address: "{{ hostvars[groups[munin_group_search_prefix + '-munin-server'][0]]['ansible_' + munin__server_interface]['ipv4']['address']}}"
   when: munin_server_address is not defined
+
+- name: define extra addresses if they are not set
+  set_fact:
+      munin_extra_allowed_address: []
+  when: munin_extra_allowed_address is not defined
   
 - name: munin.conf
   template:
