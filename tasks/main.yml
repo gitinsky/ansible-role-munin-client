@@ -4,6 +4,14 @@
   # update_cache=yes
   with_items:
       - munin-node
+  when: ansible_os_family  == "Debian"
+
+- name: install munin-node
+  yum: name={{ item }} state=present
+  # update_cache=yes
+  with_items:
+      - munin-node
+  when: ansible_os_family  == "RedHat"
 
 - name: define server ip address if it is not set
   set_fact:
@@ -15,11 +23,15 @@
   set_fact:
       munin_extra_allowed_address: []
   when: munin_extra_allowed_address is not defined
+
+- name: create /var/log/munin
+  file: state=directory dest=/var/log/munin
   
 - name: munin.conf
   template:
       src=munin-node.conf
       dest=/etc/munin/munin-node.conf
+      backup=yes
   register: munin_node
   notify: reload munin
 
